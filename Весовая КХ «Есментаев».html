@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Весовая КХ «Есментаев»</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#211E17; --paper:#EEE7D6; --card:#FBF8EF; --wheat:#C89A3C; --wheat-dark:#9C7527;
+  --steel:#5B6259; --rust:#A6402B; --line:#D8CFB6;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --ink:#F2ECDC; --paper:#1B1912; --card:#242018; --steel:#A79F8B; --line:#3A3427; }
+}
+:root[data-theme="dark"]{ --ink:#F2ECDC; --paper:#1B1912; --card:#242018; --steel:#A79F8B; --line:#3A3427; }
+
+h1,h2,h3,.num,.field-label{font-family:'Space Grotesk',sans-serif}
+.num{font-variant-numeric:tabular-nums}
+
+header.top{
+  position:sticky; top:0; top:env(safe-area-inset-top,0px);
+  background:var(--paper); border-bottom:1px solid var(--line); z-index:10;
+  padding:18px 20px 0;
+}
+.brand{display:flex; align-items:baseline; gap:10px; max-width:920px; margin:0 auto;}
+.brand h1{font-size:19px; font-weight:700; margin:0; letter-spacing:.2px;}
+.brand span{color:var(--steel); font-size:13px;}
+nav{display:flex; gap:2px; max-width:920px; margin:14px auto 0; overflow-x:auto;}
+nav button{
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14px;
+  background:none; border:none; color:var(--steel); padding:10px 16px;
+  cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap;
+}
+nav button.active{color:var(--wheat-dark); border-bottom-color:var(--wheat);}
+:root[data-theme="dark"] nav button.active, @media (prefers-color-scheme: dark){}
+main{max-width:920px; margin:0 auto; padding:24px 20px 60px;}
+section{display:none;}
+section.active{display:block;}
+
+.card{background:var(--card); border:1px solid var(--line); border-radius:3px; padding:22px 24px;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px 20px;}
+.field{display:flex; flex-direction:column; gap:6px; margin-bottom:14px;}
+.field-label{font-size:12px; color:var(--steel); font-weight:500;}
+select,input[type=number]{
+  font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:600;
+  background:var(--paper); border:1px solid var(--line); border-radius:2px;
+  padding:11px 12px; color:var(--ink); width:100%;
+}
+select:focus,input:focus,button:focus-visible{outline:2px solid var(--wheat); outline-offset:1px;}
+.divider{border:none; border-top:1px solid var(--line); margin:18px 0;}
+.netto-row{display:flex; justify-content:space-between; align-items:baseline;}
+.netto-row .num{font-size:36px; font-weight:700; color:var(--wheat-dark);}
+.netto-row .field-label{font-size:14px;}
+.save-btn{
+  margin-top:18px; width:100%; background:var(--wheat); color:#231C09; border:none;
+  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px;
+  padding:14px; border-radius:2px; cursor:pointer;
+}
+.save-btn:hover{background:var(--wheat-dark); color:#fff;}
+.trip-id{color:var(--steel); font-size:13px; margin-bottom:2px;}
+
+table{width:100%; border-collapse:collapse; margin-top:22px;}
+th{text-align:left; font-size:12px; color:var(--steel); font-weight:500; padding:0 10px 8px; border-bottom:1px solid var(--line);}
+td{padding:10px; border-bottom:1px solid var(--line); font-size:14px;}
+td.num,th.num{text-align:right; font-family:'Space Grotesk',sans-serif; font-weight:600;}
+.subhead{font-size:13px; color:var(--steel); margin:0 0 4px; text-transform:none;}
+
+.big-total{display:flex; align-items:baseline; gap:12px; margin-bottom:26px;}
+.big-total .num{font-size:52px; font-weight:700; line-height:1;}
+.big-total .unit{font-size:18px; color:var(--steel);}
+.bar-row{display:grid; grid-template-columns:110px 1fr 70px; align-items:center; gap:12px; margin-bottom:10px;}
+.bar-row .name{font-size:14px;}
+.bar-track{height:10px; background:var(--line); border-radius:2px; overflow:hidden;}
+.bar-fill{height:100%; background:var(--wheat);}
+.bar-row .num{text-align:right; font-size:13px;}
+
+.field-table td:first-child{font-family:'Space Grotesk',sans-serif; font-weight:600;}
+.discrepancy{color:var(--rust);}
+footer{max-width:920px; margin:30px auto 0; padding:0 20px; color:var(--steel); font-size:12px;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><h1>КХ «Есментаев»</h1><span>Весовая · Костанайская область</span></div>
+  <nav>
+    <button class="active" data-tab="entry">Взвешивание</button>
+    <button data-tab="day">Итог дня</button>
+    <button data-tab="fields">По полям</button>
+  </nav>
+</header>
+
+<main>
+
+<section id="entry" class="active">
+  <div class="card">
+    <div class="trip-id">Рейс № <span id="tripNo">48</span> · сегодня, <span id="nowTime"></span></div>
+    <div class="grid2">
+      <div class="field">
+        <label class="field-label" for="driver">Водитель</label>
+        <select id="driver">
+          <option>Ерлан С.</option><option>Нурлан Т.</option><option>Бекзат А.</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label" for="pole">Поле</label>
+        <select id="pole">
+          <option>Поле № 3</option><option>Поле № 5</option><option>Поле № 7</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label class="field-label" for="brutto">Брутто, кг</label>
+        <input id="brutto" type="number" inputmode="numeric" placeholder="18420">
+      </div>
+      <div class="field">
+        <label class="field-label" for="tara">Тара, кг</label>
+        <input id="tara" type="number" inputmode="numeric" placeholder="8200">
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="netto-row">
+      <span class="field-label">Нетто (авторасчёт)</span>
+      <span class="num" id="nettoOut">— кг</span>
+    </div>
+    <button class="save-btn" id="saveBtn">Сохранить рейс</button>
+  </div>
+
+  <p class="subhead" style="margin-top:26px;">Рейсы сегодня</p>
+  <table>
+    <thead><tr><th>№</th><th>Время</th><th>Водитель</th><th>Поле</th><th class="num">Нетто, кг</th></tr></thead>
+    <tbody id="tripLog"></tbody>
+  </table>
+</section>
+
+<section id="day">
+  <div class="big-total"><span class="num" id="dayTotal">0</span><span class="unit">тонн зерна принято сегодня</span></div>
+  <p class="subhead">По водителям</p>
+  <div id="byDriver"></div>
+  <p class="subhead" style="margin-top:24px;">По полям</p>
+  <div id="byFieldBars"></div>
+</section>
+
+<section id="fields">
+  <p class="subhead">Накопительный итог по полям, все дни</p>
+  <table>
+    <thead><tr><th>Поле</th><th class="num">Рейсов</th><th class="num">Нетто, т</th></tr></thead>
+    <tbody id="fieldTable"></tbody>
+  </table>
+</section>
+
+</main>
+<footer>Прототип интерфейса · данные демонстрационные, хранятся только в этом сеансе</footer>
+
+<script>
+let trips = [
+  {t:"08:14", driver:"Ерлан С.", field:"Поле № 3", netto:10220},
+  {t:"08:52", driver:"Нурлан Т.", field:"Поле № 5", netto:9840},
+  {t:"09:31", driver:"Бекзат А.", field:"Поле № 3", netto:10510},
+  {t:"10:20", driver:"Ерлан С.", field:"Поле № 7", netto:9600},
+  {t:"11:05", driver:"Нурлан Т.", field:"Поле № 5", netto:10180},
+  {t:"11:48", driver:"Бекзат А.", field:"Поле № 3", netto:9950},
+];
+let tripNo = 48;
+
+function fmt(n){ return n.toLocaleString('ru-RU'); }
+
+function renderLog(){
+  document.getElementById('tripLog').innerHTML = trips.map((r,i)=>
+    `<tr><td>${i+1}</td><td>${r.t}</td><td>${r.driver}</td><td>${r.field}</td><td class="num">${fmt(r.netto)}</td></tr>`
+  ).join('');
+  document.getElementById('tripNo').textContent = tripNo;
+}
+
+function renderDay(){
+  const total = trips.reduce((s,r)=>s+r.netto,0);
+  document.getElementById('dayTotal').textContent = (total/1000).toFixed(1);
+
+  const byDriver = {};
+  trips.forEach(r=> byDriver[r.driver] = (byDriver[r.driver]||0) + r.netto);
+  const maxD = Math.max(...Object.values(byDriver));
+  document.getElementById('byDriver').innerHTML = Object.entries(byDriver).map(([name,val])=>
+    `<div class="bar-row"><span class="name">${name}</span>
+     <div class="bar-track"><div class="bar-fill" style="width:${(val/maxD*100).toFixed(0)}%"></div></div>
+     <span class="num">${fmt(val)} кг</span></div>`
+  ).join('');
+
+  const byField = {};
+  trips.forEach(r=> byField[r.field] = (byField[r.field]||0) + r.netto);
+  const maxF = Math.max(...Object.values(byField));
+  document.getElementById('byFieldBars').innerHTML = Object.entries(byField).map(([name,val])=>
+    `<div class="bar-row"><span class="name">${name}</span>
+     <div class="bar-track"><div class="bar-fill" style="width:${(val/maxF*100).toFixed(0)}%"></div></div>
+     <span class="num">${fmt(val)} кг</span></div>`
+  ).join('');
+
+  document.getElementById('fieldTable').innerHTML = Object.entries(byField).map(([name,val])=>
+    `<tr><td>${name}</td><td class="num">${trips.filter(r=>r.field===name).length}</td><td class="num">${(val/1000).toFixed(1)}</td></tr>`
+  ).join('');
+}
+
+function recalcNetto(){
+  const b = parseFloat(document.getElementById('brutto').value);
+  const t = parseFloat(document.getElementById('tara').value);
+  const out = document.getElementById('nettoOut');
+  if(!isNaN(b) && !isNaN(t) && b>=t){
+    out.textContent = fmt(b-t) + ' кг';
+    out.classList.remove('discrepancy');
+  } else if(!isNaN(b) && !isNaN(t) && b<t){
+    out.textContent = 'проверьте ввод';
+    out.classList.add('discrepancy');
+  } else {
+    out.textContent = '— кг';
+    out.classList.remove('discrepancy');
+  }
+}
+document.getElementById('brutto').addEventListener('input', recalcNetto);
+document.getElementById('tara').addEventListener('input', recalcNetto);
+
+document.getElementById('saveBtn').addEventListener('click', ()=>{
+  const b = parseFloat(document.getElementById('brutto').value);
+  const t = parseFloat(document.getElementById('tara').value);
+  if(isNaN(b) || isNaN(t) || b<t){ alert('Укажите брутто и тару: брутто должно быть больше тары.'); return; }
+  const now = new Date();
+  trips.push({
+    t: now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0'),
+    driver: document.getElementById('driver').value,
+    field: document.getElementById('pole').value,
+    netto: b - t
+  });
+  tripNo++;
+  document.getElementById('brutto').value = '';
+  document.getElementById('tara').value = '';
+  recalcNetto();
+  renderLog(); renderDay();
+});
+
+document.querySelectorAll('nav button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('main section').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+const now = new Date();
+document.getElementById('nowTime').textContent = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+
+renderLog(); renderDay();
+</script>
+</body>
+</html>
