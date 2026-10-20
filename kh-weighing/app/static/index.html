@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EEE7D6">
+<title>Весовая КХ «Есментаев»</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<!-- ВХОД -->
+<div id="loginView" class="login-wrap" hidden>
+  <form id="loginForm" class="card login-card" novalidate>
+    <h1 data-i18n="brand">КХ «Есментаев»</h1>
+    <p class="muted" data-i18n="login_title">Вход в систему весовой</p>
+    <div class="field">
+      <label class="field-label" for="loginInput" data-i18n="login">Логин</label>
+      <input id="loginInput" name="login" autocomplete="username" autocapitalize="off" required>
+    </div>
+    <div class="field">
+      <label class="field-label" for="passwordInput" data-i18n="password">Пароль</label>
+      <input id="passwordInput" name="password" type="password" autocomplete="current-password" required>
+    </div>
+    <p id="loginError" class="error-text" role="alert"></p>
+    <button class="primary-btn" type="submit" data-i18n="sign_in">Войти</button>
+    <button class="link-btn lang-toggle" type="button">ҚАЗ</button>
+  </form>
+</div>
+
+<!-- ПРИЛОЖЕНИЕ -->
+<div id="appView" hidden>
+  <header class="top">
+    <div class="brand">
+      <h1 data-i18n="brand">КХ «Есментаев»</h1>
+      <span class="muted" data-i18n="subtitle">Весовая · Костанайская область</span>
+      <span class="spacer"></span>
+      <span id="syncPill" class="pill" role="status" aria-live="polite"></span>
+      <button class="link-btn lang-toggle" type="button">ҚАЗ</button>
+    </div>
+    <nav role="tablist">
+      <button role="tab" class="active" data-tab="entry" data-i18n="tab_entry">Взвешивание</button>
+      <button role="tab" data-tab="day" data-i18n="tab_day">Итог дня</button>
+      <button role="tab" data-tab="season" data-i18n="tab_season">Сезон</button>
+      <button role="tab" data-tab="vehicles" data-i18n="tab_vehicles" data-admin hidden>Машины</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Взвешивание: ZER-1..7 -->
+    <section id="entry" class="active">
+      <form id="tripForm" class="card" novalidate>
+        <div class="trip-id"><span data-i18n="new_trip">Новый рейс</span> · <span id="nowTime"></span></div>
+
+        <fieldset class="field" id="vehicleGroup">
+          <legend class="field-label" data-i18n="vehicle">Машина</legend>
+          <div class="seg" id="vehicleButtons"></div>
+          <p class="error-text" data-error-for="vehicle_id"></p>
+        </fieldset>
+
+        <div class="field">
+          <label class="field-label" for="fieldSelect" data-i18n="field">Поле</label>
+          <select id="fieldSelect" required></select>
+          <p class="error-text" data-error-for="field_id"></p>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label class="field-label" for="grossInput"><span data-i18n="gross">Брутто</span>, <span data-i18n="kg">кг</span></label>
+            <input id="grossInput" type="number" inputmode="numeric" min="1" max="100000" step="1" required>
+            <p class="error-text" data-error-for="gross_kg"></p>
+          </div>
+          <div class="field">
+            <label class="field-label" for="tareInput"><span data-i18n="tare">Тара</span>, <span data-i18n="kg">кг</span></label>
+            <input id="tareInput" type="number" inputmode="numeric" min="1" max="100000" step="1" readonly>
+            <p class="hint tare-hint"><span id="tareHint">по машине</span>
+              <button id="tareEditBtn" class="link-btn inline" type="button" data-i18n="change">изменить</button></p>
+            <p class="error-text" data-error-for="tare_kg"></p>
+          </div>
+        </div>
+
+        <hr class="divider">
+        <div class="netto-row">
+          <span class="field-label" data-i18n="netto_auto">Нетто (авторасчёт)</span>
+          <output class="num" id="nettoOut" for="grossInput tareInput">— кг</output>
+        </div>
+        <p id="formError" class="error-text" role="alert"></p>
+        <button class="primary-btn" type="submit" data-i18n="save_trip">Сохранить рейс</button>
+      </form>
+
+      <h2 class="subhead"><span data-i18n="trips_today">Рейсы сегодня</span> <span id="todayCount" class="muted"></span></h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>№</th><th data-i18n="time">Время</th><th data-i18n="vehicle">Машина</th>
+            <th data-i18n="field">Поле</th><th class="num" data-i18n="netto_kg">Нетто, кг</th>
+          </tr></thead>
+          <tbody id="tripLog"></tbody>
+        </table>
+      </div>
+      <p id="tripLogEmpty" class="empty" data-i18n="no_trips" hidden>Рейсов пока нет</p>
+      <p class="hint" data-i18n="tap_to_edit">Нажмите на рейс, чтобы исправить запись.</p>
+    </section>
+
+    <!-- Итог дня: ZER-11..13 -->
+    <section id="day">
+      <div class="toolbar">
+        <label class="field-label" for="dayDate" data-i18n="date">Дата</label>
+        <input id="dayDate" type="date">
+      </div>
+      <div class="big-total">
+        <span class="num" id="dayTotal">0</span>
+        <span class="unit" data-i18n="tonnes_accepted">тонн зерна принято</span>
+      </div>
+      <p class="muted" id="dayTrips"></p>
+      <p class="warn" id="dayPending" hidden></p>
+      <h2 class="subhead" data-i18n="by_vehicle">По машинам</h2>
+      <div id="byVehicle"></div>
+      <h2 class="subhead" data-i18n="by_field">По полям</h2>
+      <div id="byField"></div>
+    </section>
+
+    <!-- Сезон -->
+    <section id="season">
+      <div class="toolbar">
+        <label class="field-label" for="seasonYear" data-i18n="year">Год</label>
+        <input id="seasonYear" type="number" min="2020" max="2100" step="1">
+      </div>
+      <div class="big-total">
+        <span class="num" id="seasonTotal">0</span>
+        <span class="unit" data-i18n="tonnes_season">тонн за сезон</span>
+      </div>
+      <h2 class="subhead" data-i18n="by_field">По полям</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="field">Поле</th><th class="num" data-i18n="trips">Рейсов</th><th class="num" data-i18n="netto_t">Нетто, т</th></tr></thead>
+          <tbody id="seasonFields"></tbody>
+        </table>
+      </div>
+      <h2 class="subhead" data-i18n="by_vehicle">По машинам</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="vehicle">Машина</th><th class="num" data-i18n="trips">Рейсов</th><th class="num" data-i18n="netto_t">Нетто, т</th></tr></thead>
+          <tbody id="seasonVehicles"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Машины (только администратор): тара на сезон -->
+    <section id="vehicles">
+      <h2 class="subhead" data-i18n="vehicles_tare_title">Тара машин на сезон</h2>
+      <p class="hint" data-i18n="vehicles_tare_hint">Новая тара подставляется только в новые рейсы. Уже сохранённые рейсы не меняются.</p>
+      <div id="vehicleTareList" class="card"></div>
+    </section>
+  </main>
+
+  <footer><span data-i18n="footer">Учёт веса зерна · MVP</span> · <span id="userName"></span>
+    <button id="logoutBtn" class="link-btn" type="button" data-i18n="logout">Выйти</button></footer>
+</div>
+
+<!-- Исправление рейса: ZER-9 -->
+<dialog id="editDialog">
+  <form id="editForm" method="dialog" novalidate>
+    <h2 data-i18n="edit_trip">Исправить рейс</h2>
+    <p class="muted" id="editMeta"></p>
+    <div class="field">
+      <label class="field-label" for="editVehicle" data-i18n="vehicle">Машина</label>
+      <select id="editVehicle"></select>
+    </div>
+    <div class="field">
+      <label class="field-label" for="editField" data-i18n="field">Поле</label>
+      <select id="editField"></select>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label class="field-label" for="editGross"><span data-i18n="gross">Брутто</span>, <span data-i18n="kg">кг</span></label>
+        <input id="editGross" type="number" inputmode="numeric" min="1" step="1">
+      </div>
+      <div class="field">
+        <label class="field-label" for="editTare"><span data-i18n="tare">Тара</span>, <span data-i18n="kg">кг</span></label>
+        <input id="editTare" type="number" inputmode="numeric" min="1" step="1">
+      </div>
+    </div>
+    <div class="netto-row"><span class="field-label" data-i18n="netto">Нетто</span><output class="num" id="editNetto">—</output></div>
+    <p id="editError" class="error-text" role="alert"></p>
+    <div class="dialog-actions">
+      <button type="button" class="secondary-btn" id="editCancel" data-i18n="cancel">Отмена</button>
+      <button type="submit" class="primary-btn" id="editSave" data-i18n="save_changes">Сохранить исправление</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="/i18n.js"></script>
+<script src="/outbox.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
