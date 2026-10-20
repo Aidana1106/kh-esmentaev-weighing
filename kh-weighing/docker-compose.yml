@@ -1,0 +1,56 @@
+# Запуск: cp .env.example .env  →  заполнить  →  docker compose up -d --build   (НФТ-12)
+# С HTTPS на своём домене:          docker compose --profile https up -d --build
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: weighing
+      POSTGRES_USER: weighing
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?задайте DB_PASSWORD в .env}
+      TZ: Asia/Qostanay
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U weighing -d weighing"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://weighing:${DB_PASSWORD}@db:5432/weighing
+      APP_TZ: ${APP_TZ:-Asia/Qostanay}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      SESSION_DAYS: ${SESSION_DAYS:-30}
+      ADMIN_LOGIN: ${ADMIN_LOGIN:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?задайте ADMIN_PASSWORD в .env}
+    ports:
+      - "${APP_PORT:-8000}:8000"
+
+  # HTTPS с автоматическим сертификатом Let's Encrypt (НФТ-10).
+  # Нужны домен, указывающий на сервер, и открытые порты 80/443.
+  caddy:
+    image: caddy:2
+    profiles: ["https"]
+    restart: unless-stopped
+    depends_on: [app]
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
