@@ -1,0 +1,166 @@
+/* Палитра из прототипа Даны: пшеница, бумага, сталь. */
+:root{
+  --ink:#211E17; --paper:#EEE7D6; --card:#FBF8EF; --wheat:#C89A3C; --wheat-dark:#7E5E1E;
+  --steel:#545B52; --rust:#A6402B; --line:#D8CFB6; --ok:#3F6B3A; --warn-bg:#F6E7C4;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#F2ECDC; --paper:#1B1912; --card:#242018; --steel:#B3AB97; --line:#3A3427;
+    --wheat-dark:#E0B65A; --ok:#8FC388; --warn-bg:#3A2F17; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#F2ECDC; --paper:#1B1912; --card:#242018; --steel:#B3AB97; --line:#3A3427;
+  --wheat-dark:#E0B65A; --ok:#8FC388; --warn-bg:#3A2F17; color-scheme: dark;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink); font-family:var(--font);
+  -webkit-font-smoothing:antialiased;
+  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0);
+}
+[hidden]{display:none !important}
+h1,h2{margin:0}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--steel)}
+.hint{color:var(--steel); font-size:12px; margin:4px 0 0}
+.empty{color:var(--steel); padding:14px 0}
+.warn{background:var(--warn-bg); padding:8px 12px; border-radius:3px; font-size:14px}
+
+/* Шапка */
+header.top{position:sticky; top:0; background:var(--paper); border-bottom:1px solid var(--line); z-index:10; padding:14px 16px 0}
+.brand{display:flex; align-items:center; gap:10px; max-width:920px; margin:0 auto}
+.brand h1{font-size:18px; font-weight:700; white-space:nowrap}
+.brand .muted{font-size:13px}
+.spacer{flex:1}
+nav{display:flex; gap:2px; max-width:920px; margin:10px auto 0; overflow-x:auto}
+nav button{
+  font:600 15px var(--font); background:none; border:none; color:var(--steel);
+  padding:10px 14px; cursor:pointer; border-bottom:3px solid transparent; white-space:nowrap; min-height:44px;
+}
+nav button.active{color:var(--ink); border-bottom-color:var(--wheat)}
+
+.pill{font-size:12px; padding:4px 10px; border-radius:20px; border:1px solid var(--line); white-space:nowrap}
+.pill.online{color:var(--ok)}
+.pill.offline{color:var(--rust); border-color:var(--rust)}
+
+main{max-width:920px; margin:0 auto; padding:20px 16px 40px}
+section{display:none}
+section.active{display:block}
+
+/* Карточки и формы */
+.card{background:var(--card); border:1px solid var(--line); border-radius:4px; padding:18px}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:0 16px}
+.field{display:flex; flex-direction:column; gap:6px; margin:0 0 14px; border:0; padding:0; min-width:0}
+.field-label{font-size:13px; color:var(--steel); font-weight:500; padding:0}
+select,input{
+  font:600 18px var(--font); background:var(--paper); border:1px solid var(--line); border-radius:3px;
+  padding:11px 12px; color:var(--ink); width:100%; min-height:48px;
+}
+input[readonly]{background:transparent; border-style:dashed}
+input.invalid,select.invalid,.seg.invalid{outline:2px solid var(--rust); outline-offset:1px}
+select:focus-visible,input:focus-visible,button:focus-visible,.seg label:focus-within{outline:3px solid var(--wheat); outline-offset:2px}
+.error-text{color:var(--rust); font-size:13px; margin:0; min-height:0}
+.error-text:empty{display:none}
+.trip-id{color:var(--steel); font-size:13px; margin-bottom:12px}
+
+/* Выбор машины кнопками: одно нажатие вместо выпадающего списка */
+.seg{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px}
+.seg input{position:absolute; opacity:0; width:1px; height:1px}
+.seg label{
+  display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+  border:1px solid var(--line); border-radius:3px; padding:10px 12px; cursor:pointer;
+  background:var(--paper); min-height:56px;
+}
+.seg label b{font-size:17px}
+.seg label small{color:var(--steel); font-size:12px}
+.seg input:checked + label{background:var(--wheat); border-color:var(--wheat); color:#231C09}
+.seg input:checked + label small{color:#3B2E10}
+
+.tare-hint{display:flex; flex-wrap:wrap; align-items:center; gap:0 6px}
+.link-btn.inline{padding:2px 0; min-height:0; font-size:13px}
+
+.divider{border:none; border-top:1px solid var(--line); margin:4px 0 14px}
+.netto-row{display:flex; justify-content:space-between; align-items:baseline; gap:12px}
+.netto-row .num{font-size:34px; font-weight:700; color:var(--wheat-dark)}
+.netto-row .num.bad{color:var(--rust); font-size:18px}
+
+.primary-btn,.secondary-btn{
+  font:700 17px var(--font); border-radius:3px; padding:14px; cursor:pointer; min-height:52px; border:none;
+}
+.primary-btn{margin-top:14px; width:100%; background:var(--wheat); color:#231C09}
+.primary-btn:hover{background:#B78A2F}
+.primary-btn:disabled{opacity:.6; cursor:progress}
+.secondary-btn{background:transparent; color:var(--ink); border:1px solid var(--line)}
+.link-btn{background:none; border:none; color:var(--wheat-dark); font:600 14px var(--font); cursor:pointer; padding:8px 6px; min-height:40px; text-decoration:underline; text-underline-offset:3px}
+
+/* Таблицы */
+.subhead{font-size:15px; font-weight:600; margin:26px 0 8px}
+.table-wrap{overflow-x:auto}
+table{width:100%; border-collapse:collapse}
+th{text-align:left; font-size:12px; color:var(--steel); font-weight:500; padding:0 8px 8px; border-bottom:1px solid var(--line)}
+td{padding:11px 8px; border-bottom:1px solid var(--line); font-size:15px}
+td.num,th.num{text-align:right; font-weight:600}
+tbody tr[data-id]{cursor:pointer}
+tbody tr[data-id]:hover{background:var(--card)}
+tbody tr.pending td{color:var(--steel)}
+tbody tr.rejected td{color:var(--rust)}
+.badge{display:inline-block; font-size:11px; font-weight:600; padding:1px 6px; border-radius:10px; margin-left:6px; vertical-align:1px; border:1px solid currentColor}
+.badge.corrected{color:var(--wheat-dark)}
+.badge.pending{color:var(--steel)}
+.badge.rejected{color:var(--rust)}
+
+/* Итоги */
+.toolbar{display:flex; align-items:center; gap:10px; margin-bottom:18px}
+.toolbar input{width:auto; min-width:170px}
+.big-total{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
+.big-total .num{font-size:52px; font-weight:700; line-height:1}
+.big-total .unit{font-size:17px; color:var(--steel)}
+.bar-row{display:grid; grid-template-columns:minmax(90px,130px) 1fr minmax(110px,auto); align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--line)}
+.bar-row .name{font-size:15px; font-weight:600}
+.bar-row .val{text-align:right; font-size:14px}
+.bar-row .val small{display:block; color:var(--steel); font-weight:400}
+.bar-track{height:10px; background:var(--line); border-radius:2px; overflow:hidden}
+.bar-fill{height:100%; background:var(--wheat)}
+.bar-row.zero .name,.bar-row.zero .val{color:var(--steel); font-weight:400}
+
+/* Машины */
+.tare-item{display:grid; grid-template-columns:1fr 140px auto; gap:10px; align-items:center; padding:8px 0; border-bottom:1px solid var(--line)}
+.tare-item:last-child{border-bottom:none}
+
+/* Вход */
+.login-wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px}
+.login-card{width:100%; max-width:380px}
+.login-card h1{font-size:22px}
+.login-card p.muted{margin:4px 0 18px}
+
+/* Диалог */
+dialog{border:1px solid var(--line); border-radius:6px; background:var(--card); color:var(--ink); padding:20px; width:min(480px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(20,18,12,.5)}
+dialog h2{font-size:18px; margin-bottom:4px}
+.dialog-actions{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px}
+.dialog-actions .primary-btn{margin-top:0}
+
+.toast{
+  position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom,0)); transform:translateX(-50%);
+  background:var(--ink); color:var(--paper); padding:12px 18px; border-radius:4px; font-size:15px;
+  max-width:calc(100vw - 32px); z-index:50; box-shadow:0 4px 20px rgba(0,0,0,.25);
+}
+footer{max-width:920px; margin:0 auto; padding:0 16px 24px; color:var(--steel); font-size:13px; display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+footer .link-btn{margin-left:auto}
+
+@media (max-width:520px){
+  .brand .muted{display:none}
+  .brand h1{font-size:16px}
+  .pill{padding:4px 8px}
+  .grid2{grid-template-columns:1fr 1fr; gap:0 10px}
+  .big-total .num{font-size:44px}
+  th:nth-child(2),td:nth-child(2){padding-left:4px; padding-right:4px}
+  td{font-size:14px; padding:10px 5px}
+  .tare-item{grid-template-columns:1fr 110px}
+  .tare-item button{grid-column:1 / -1; justify-self:end}
+}
