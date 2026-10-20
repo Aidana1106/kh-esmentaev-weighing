@@ -96,9 +96,10 @@ def test_idempotent_retry_from_offline_queue(operator):
 
 
 def test_offline_weighed_at_is_kept(operator):
-    when = datetime.now(QOSTANAY).replace(hour=9, minute=15, second=0, microsecond=0)
+    # время из прошлого: фиксированное 09:15 после полуночи по Костанаю оказывалось в будущем
+    when = (datetime.now(QOSTANAY) - timedelta(hours=2)).replace(second=0, microsecond=0)
     r, _ = put_trip(operator, weighed_at=when.isoformat())
-    assert r.json()["weighed_local"] == "09:15"
+    assert r.json()["weighed_local"] == when.strftime("%H:%M")
 
 
 # --- ZER-1, 2, 3, 6: проверка ввода -------------------------------------------
