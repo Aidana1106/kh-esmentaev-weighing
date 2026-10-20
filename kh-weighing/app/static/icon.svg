@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#EEE7D6"/>
+  <!-- платформа весов -->
+  <rect x="96" y="352" width="320" height="36" rx="6" fill="#211E17"/>
+  <rect x="140" y="388" width="24" height="40" fill="#211E17"/>
+  <rect x="348" y="388" width="24" height="40" fill="#211E17"/>
+  <!-- колос -->
+  <rect x="250" y="128" width="12" height="224" fill="#9C7527"/>
+  <g fill="#C89A3C">
+    <ellipse cx="256" cy="118" rx="18" ry="34"/>
+    <ellipse cx="226" cy="168" rx="16" ry="32" transform="rotate(-28 226 168)"/>
+    <ellipse cx="286" cy="168" rx="16" ry="32" transform="rotate(28 286 168)"/>
+    <ellipse cx="226" cy="228" rx="16" ry="32" transform="rotate(-28 226 228)"/>
+    <ellipse cx="286" cy="228" rx="16" ry="32" transform="rotate(28 286 228)"/>
+    <ellipse cx="228" cy="288" rx="15" ry="30" transform="rotate(-28 228 288)"/>
+    <ellipse cx="284" cy="288" rx="15" ry="30" transform="rotate(28 284 288)"/>
+  </g>
+</svg>
