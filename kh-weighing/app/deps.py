@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Iterator
+from collections.abc import Iterator
 
 from fastapi import Depends, Request
 from psycopg import Connection

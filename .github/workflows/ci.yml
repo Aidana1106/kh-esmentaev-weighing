@@ -31,4 +31,6 @@ jobs:
           cache: pip
           cache-dependency-path: kh-weighing/requirements-dev.txt
       - run: pip install -r requirements-dev.txt
+      - name: Линтер (ruff)
+        run: ruff check .
       - run: pytest -q

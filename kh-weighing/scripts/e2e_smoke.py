@@ -43,7 +43,8 @@ def main():
         # 1. Вход
         page.goto(BASE)
         expect(page.locator("#loginView")).to_be_visible()
-        page.fill("#loginInput", "vesovaya"); page.fill("#passwordInput", "wrong")
+        page.fill("#loginInput", "vesovaya")
+        page.fill("#passwordInput", "wrong")
         page.click("#loginForm button[type=submit]")
         expect(page.locator("#loginError")).to_have_text("Неверный логин или пароль")
         page.screenshot(path=SHOTS / "01-login.png")
@@ -82,7 +83,8 @@ def main():
 
         # 5. Ручная тара
         page.click("#tareEditBtn")
-        page.fill("#tareInput", "6000"); page.fill("#grossInput", "22500")
+        page.fill("#tareInput", "6000")
+        page.fill("#grossInput", "22500")
         expect(page.locator("#nettoOut")).to_have_text("16 500 кг")
         page.click("#tripForm button[type=submit]")
         expect(page.locator("#tripLog tr")).to_have_count(2)

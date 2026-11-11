@@ -9,8 +9,8 @@ def parse_day(value: str | None, tz: str) -> date:
         return datetime.now(ZoneInfo(tz)).date()
     try:
         return date.fromisoformat(value)
-    except ValueError:
-        raise ApiError(422, "bad_date", "Дата в формате ГГГГ-ММ-ДД", field="date")
+    except ValueError as err:
+        raise ApiError(422, "bad_date", "Дата в формате ГГГГ-ММ-ДД", field="date") from err
 
 
 def day_bounds(day: date, tz: str) -> tuple[datetime, datetime]:
