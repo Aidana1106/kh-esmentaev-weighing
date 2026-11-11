@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request, Response
@@ -78,7 +78,9 @@ def list_trips(
     day = parse_day(date, tz)
     start, end = day_bounds(day, tz)
     rows = conn.execute(
-        TRIP_SELECT + " WHERE t.weighed_at >= %(start)s AND t.weighed_at < %(end)s ORDER BY t.weighed_at, t.received_at",
+        TRIP_SELECT
+        + " WHERE t.weighed_at >= %(start)s AND t.weighed_at < %(end)s"
+        + " ORDER BY t.weighed_at, t.received_at",
         {"tz": tz, "start": start, "end": end},
     ).fetchall()
     return {"date": day.isoformat(), "trips": rows}
@@ -102,7 +104,7 @@ def create_trip(
         raise ApiError(422, "tare_missing", "У машины не задана тара — введите тару вручную", field="tare_kg")
     _check_weights(body.gross_kg, tare)
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     weighed_at = body.weighed_at or now
     if weighed_at > now + FUTURE_TOLERANCE:
         raise ApiError(422, "future_time", "Время взвешивания в будущем — проверьте часы телефона", field="weighed_at")

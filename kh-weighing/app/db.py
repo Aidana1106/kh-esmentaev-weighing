@@ -22,18 +22,17 @@ def create_pool(database_url: str) -> ConnectionPool:
 def migrate(pool: ConnectionPool) -> list[str]:
     """Применяет SQL-файлы из migrations/ по порядку, каждый один раз."""
     applied_now: list[str] = []
-    with pool.connection() as conn:
-        with conn.transaction():
-            conn.execute("SELECT pg_advisory_xact_lock(%s)", (_MIGRATION_LOCK_ID,))
-            conn.execute(
-                "CREATE TABLE IF NOT EXISTS schema_migrations ("
-                " version text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())"
-            )
-            done = {r["version"] for r in conn.execute("SELECT version FROM schema_migrations")}
-            for path in sorted(MIGRATIONS_DIR.glob("*.sql")):
-                if path.name in done:
-                    continue
-                conn.execute(path.read_text(encoding="utf-8"))
-                conn.execute("INSERT INTO schema_migrations(version) VALUES (%s)", (path.name,))
-                applied_now.append(path.name)
+    with pool.connection() as conn, conn.transaction():
+        conn.execute("SELECT pg_advisory_xact_lock(%s)", (_MIGRATION_LOCK_ID,))
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS schema_migrations ("
+            " version text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())"
+        )
+        done = {r["version"] for r in conn.execute("SELECT version FROM schema_migrations")}
+        for path in sorted(MIGRATIONS_DIR.glob("*.sql")):
+            if path.name in done:
+                continue
+            conn.execute(path.read_text(encoding="utf-8"))
+            conn.execute("INSERT INTO schema_migrations(version) VALUES (%s)", (path.name,))
+            applied_now.append(path.name)
     return applied_now

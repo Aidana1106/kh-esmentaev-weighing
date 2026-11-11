@@ -1,5 +1,5 @@
 """Тесты по критериям приёмки историй ZER-1..13 и НФТ-04/05/07."""
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 
 from fastapi.testclient import TestClient
 
@@ -129,7 +129,7 @@ def test_negative_and_non_numeric_rejected(operator):
 
 
 def test_future_time_rejected(operator):
-    r, _ = put_trip(operator, weighed_at=(datetime.now(timezone.utc) + timedelta(hours=2)).isoformat())
+    r, _ = put_trip(operator, weighed_at=(datetime.now(UTC) + timedelta(hours=2)).isoformat())
     assert r.status_code == 422 and r.json()["code"] == "future_time"
 
 
@@ -188,9 +188,8 @@ def test_audit_log_is_append_only(app_client):
     op = login(app_client, "operator")
     _, tid = put_trip(op, gross_kg=25000, tare_kg=7000)
     op.patch(f"/api/trips/{tid}", json={"gross_kg": 24000})
-    with db() as conn:
-        with pytest.raises(psycopg.errors.RaiseException):
-            conn.execute("DELETE FROM trip_revisions")
+    with db() as conn, pytest.raises(psycopg.errors.RaiseException):
+        conn.execute("DELETE FROM trip_revisions")
 
 
 # --- ZER-11..13: итоги ------------------------------------------------------
