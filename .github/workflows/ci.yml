@@ -33,4 +33,5 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - name: Линтер (ruff)
         run: ruff check .
-      - run: pytest -q
+      - name: Тесты и порог покрытия 60 %
+        run: pytest -q --cov=app --cov-report=term --cov-fail-under=60
