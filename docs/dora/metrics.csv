@@ -1,0 +1,6 @@
+﻿change,title,first_commit,ci_started,ci_finished,result,run_url,deployed,lead_time_min,failed
+PR #35,Merge pull request #35 from Aidana1106/feature/24-docker-i-bekap,2026-10-20 23:36,2026-10-21 00:16,2026-10-21 00:17,failure,https://github.com/Aidana1106/kh-esmentaev-weighing/actions/runs/39482049898,2026-10-21 00:26,49.5,True
+коммит 81bb394,Add files via upload,2026-10-21 00:18,2026-10-21 00:18,2026-10-21 00:18,failure,https://github.com/Aidana1106/kh-esmentaev-weighing/actions/runs/39482267151,2026-10-21 00:26,8.366666666666667,True
+PR #36,Merge pull request #36 from Aidana1106/fix/15-test-vremya-oflain,2026-10-21 00:22,2026-10-21 00:25,2026-10-21 00:26,success,https://github.com/Aidana1106/kh-esmentaev-weighing/actions/runs/39483355851,2026-10-21 00:26,3.95,False
+PR #43,Merge pull request #43 from Aidana1106/Aidana1106-patch-1,2026-11-04 16:53,2026-11-04 16:58,2026-11-04 16:59,success,https://github.com/Aidana1106/kh-esmentaev-weighing/actions/runs/41825316727,2026-11-04 16:59,5.783333333333333,False
+PR #44,Merge pull request #44 from Aidana1106/Aidana1106-patch-2,2026-11-04 17:15,2026-11-04 17:16,2026-11-04 17:17,success,https://github.com/Aidana1106/kh-esmentaev-weighing/actions/runs/41827819901,2026-11-04 17:17,1.3,False

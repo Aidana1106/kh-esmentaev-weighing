@@ -1,0 +1,28 @@
+name: DORA-метрики
+
+# Пересчёт метрик доставки: вручную (Actions → DORA-метрики → Run workflow)
+# и каждый понедельник в 09:00 по Костанаю (04:00 UTC).
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * 1"
+
+jobs:
+  dora:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r scripts/requirements.txt
+      - name: Посчитать метрики
+        env:
+          # fine-grained токен только на чтение, лежит в секретах репозитория
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: python scripts/dora.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dora-dashboard
+          path: docs/dora/
