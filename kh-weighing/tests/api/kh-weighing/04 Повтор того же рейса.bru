@@ -1,0 +1,22 @@
+meta {
+  name: 04 Повтор того же рейса (офлайн-очередь)
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/trips/{{tripId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  { "vehicle_id": {{vehicleId}}, "field_id": 1, "gross_kg": 25400 }
+}
+
+tests {
+  test("повтор не создаёт дубль: 200, тот же рейс", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.id).to.equal(bru.getVar("tripId"));
+  });
+}

@@ -1,0 +1,16 @@
+# Мониторинг демо-стенда (ЛЗ 11, НФТ-02): Uptime Kuma каждые 60 с проверяет /api/health.
+# Запуск:  docker compose -f deploy/docker-compose.monitoring.yml up -d
+# Открыть: http://localhost:3001 → создать администратора → Add New Monitor:
+#   Monitor Type: HTTP(s), URL: https://<адрес стенда>/api/health, Heartbeat Interval: 60,
+#   Retries: 2, уведомление: Telegram-бот команды (Settings → Notifications).
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:1.23.16
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - uptime-kuma:/app/data
+
+volumes:
+  uptime-kuma:

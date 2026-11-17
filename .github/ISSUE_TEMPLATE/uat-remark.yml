@@ -1,0 +1,34 @@
+name: Замечание UAT
+description: Замечание с приёмочного тестирования (ЛЗ 11)
+title: "[UAT] "
+labels: ["UAT"]
+body:
+  - type: dropdown
+    id: scenario
+    attributes:
+      label: Сценарий
+      options: [UAT-1 Начать смену, UAT-2 Записать рейс, UAT-3 Ошибка при вводе веса, UAT-4 Работа без связи, UAT-5 Исправить рейс, UAT-6 Итоги дня, UAT-7 Итог за сезон, UAT-8 Тара на новый сезон, UAT-9 Казахский язык, UAT-10 Разграничение прав]
+    validations: { required: true }
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Тип замечания
+      description: Сортируем сразу, при заказчике
+      options: [дефект – не выполнен согласованный критерий, уточнение – критерий поняли по-разному, запрос на изменение – новая функция]
+    validations: { required: true }
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Приоритет (ставит PM)
+      options: [P1 – система недоступна или искажены данные, P2 – ключевой сценарий не работает, P3 – неудобство, есть обход, P4 – косметика]
+    validations: { required: true }
+  - type: textarea
+    id: what
+    attributes:
+      label: Что сделали и что увидели
+      placeholder: "Шаги, ожидаемый результат по критерию, фактический результат, скриншот"
+    validations: { required: true }
+  - type: input
+    id: who
+    attributes:
+      label: Кто нашёл (команда-заказчик)
