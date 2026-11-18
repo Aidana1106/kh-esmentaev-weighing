@@ -1,0 +1,27 @@
+meta {
+  name: 05 Тара больше брутто (негативный)
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/trips/{{badTripId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  { "vehicle_id": {{vehicleId}}, "field_id": 1, "gross_kg": 5000 }
+}
+
+script:pre-request {
+  const { v4 } = require("uuid");
+  bru.setVar("badTripId", v4());
+}
+
+tests {
+  test("422 и понятный код ошибки", function() {
+    expect(res.status).to.equal(422);
+    expect(res.body.code).to.equal("tare_ge_gross");
+  });
+}

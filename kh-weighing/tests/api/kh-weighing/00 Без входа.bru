@@ -1,0 +1,14 @@
+meta {
+  name: 00 Итоги без входа (негативный)
+  type: http
+  seq: 0
+}
+
+get {
+  url: {{baseUrl}}/api/summary/day
+  auth: none
+}
+
+tests {
+  test("без сессии – 401", function() { expect(res.status).to.equal(401); });
+}
