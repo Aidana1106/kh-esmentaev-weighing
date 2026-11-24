@@ -9,6 +9,8 @@
               (если сегодня рейсов не было – правило rules)
   zeroshot  – локальная модель (Ollama), промпт без примеров
   fewshot   – та же модель, промпт с 4 примерами (не из eval-набора)
+  features  – та же модель, но отклонения считает код и передаёт готовыми числами (после разбора ошибок
+              zero-shot/few-shot: модель путала брутто и нетто и ошибалась в вычитании)
 
 Сырые ответы: evals/raw/<подход>.jsonl, итог: evals/results.json.
 """
@@ -84,6 +86,10 @@ def ask(ex: dict, fewshot: bool) -> tuple[bool, str, dict]:
             msgs += [{"role": "user", "content": json.dumps(inp, ensure_ascii=False)},
                      {"role": "assistant", "content": json.dumps(out, ensure_ascii=False)}]
     msgs.append({"role": "user", "content": json.dumps(llm_input(ex), ensure_ascii=False)})
+    return chat(msgs)
+
+
+def chat(msgs: list[dict]) -> tuple[bool, str, dict]:
     r = requests.post(f"{OLLAMA}/api/chat", timeout=600, json={
         "model": MODEL, "messages": msgs, "stream": False, "format": "json", "options": OPTIONS})
     r.raise_for_status()
@@ -99,11 +105,36 @@ def ask(ex: dict, fewshot: bool) -> tuple[bool, str, dict]:
     return flag, reason, meta
 
 
+SYSTEM_FEATURES = """Ты проверяешь рейс на зерновой весовой. Отклонения уже посчитаны, сам ничего не вычисляй.
+Ошибка ввода вероятна, если нетто отличается от сегодняшних рейсов этой машины больше чем на 15 %
+или (если сегодня рейсов нет) меньше 1/3 или больше 1,5 сезонной медианы. Последний неполный рейс
+с поля и перегруженный прицеп бывают и без ошибки – тогда напиши это в причине.
+Ответь только JSON: {"suspicious": true или false, "reason": "коротко по-русски"}"""
+
+
+def features(ex: dict) -> dict:
+    m = MEDIAN[ex["vehicle"]]
+    f = {"vehicle": ex["vehicle"], "net_kg": ex["net_kg"], "trips_today_before": len(ex["prev_net_today_kg"]),
+         "ratio_to_season_median": round(ex["net_kg"] / m, 2)}
+    if ex["prev_net_today_kg"]:
+        med = statistics.median(ex["prev_net_today_kg"])
+        f["today_median_net_kg"] = round(med)
+        f["deviation_from_today_pct"] = round((ex["net_kg"] - med) / med * 100)
+    return f
+
+
+def ask_features(ex: dict) -> tuple[bool, str, dict]:
+    msgs = [{"role": "system", "content": SYSTEM_FEATURES},
+            {"role": "user", "content": json.dumps(features(ex), ensure_ascii=False)}]
+    return chat(msgs)
+
+
 APPROACHES = {
     "rules": lambda ex: (*rules(ex), {}),
     "stats": lambda ex: (*stats(ex), {}),
     "zeroshot": lambda ex: ask(ex, False),
     "fewshot": lambda ex: ask(ex, True),
+    "features": ask_features,
 }
 
 
@@ -149,7 +180,7 @@ def main() -> None:
             m["avg_output_tokens"] = round(statistics.mean(r["output_tokens"] for r in tok))
         results["approaches"][name] = m
         print(f"{name:9s} P={m['precision']:.2f} R={m['recall']:.2f} F1={m['f1']:.2f} "
-              f"ложные={m['false_alarm_rate']:.2f} {m['ms_per_example']} мс")
+              f"ложные={m['false_alarm_rate']:.2f} {m['ms_per_example']} мс", flush=True)
     (HERE / "results.json").write_text(json.dumps(results, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
