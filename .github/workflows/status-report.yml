@@ -60,6 +60,7 @@ jobs:
             python scripts/pm_report/status_report.py --sprint "Спринт 5" --start 2026-11-17 --end 2026-11-23
           fi
           cat reports/report_*.md >> "$GITHUB_STEP_SUMMARY"
+          cat reports/report_*.md   # копия в лог прогона
 
       - uses: actions/upload-artifact@v4
         with:
