@@ -40,6 +40,11 @@ jobs:
           echo "===== results.json ====="; cat evals/results.json
           for f in evals/raw/*.jsonl; do echo "===== $f ====="; cat "$f"; done
 
+      - name: Токены токенизатором облачной модели (для стоимости)
+        run: |
+          pip install tiktoken==0.12.0
+          echo "===== tokens ====="; python evals/count_tokens.py
+
       - uses: actions/upload-artifact@v4
         with:
           name: evals
