@@ -37,6 +37,8 @@ jobs:
         run: ruff check .
       - name: Тесты и порог покрытия 60 %
         run: pytest -q --cov=app --cov-report=term --cov-fail-under=60
+      - name: Тесты проверки веса на телефоне (node, включая eval-набор ЛЗ 12)
+        run: node --test tests/js/*.test.mjs
       - name: Поиск секретов в коде (gitleaks)
         uses: gitleaks/gitleaks-action@v2
         env:

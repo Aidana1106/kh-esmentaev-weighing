@@ -18,7 +18,8 @@ TRIP_SELECT = """
     SELECT t.id, t.vehicle_id, v.name AS vehicle_name, t.field_id, f.name AS field_name,
            t.gross_kg, t.tare_kg, t.net_kg, t.weighed_at,
            to_char(t.weighed_at AT TIME ZONE %(tz)s, 'HH24:MI') AS weighed_local,
-           t.is_corrected, t.updated_at, u.name AS created_by_name
+           t.is_corrected, t.updated_at, u.name AS created_by_name,
+           t.weight_warning, t.weight_confirmed
     FROM trips t
     JOIN vehicles v ON v.id = t.vehicle_id
     JOIN fields f ON f.id = t.field_id
@@ -32,6 +33,8 @@ class TripIn(BaseModel):
     gross_kg: int = Field(gt=0, le=MAX_KG)
     tare_kg: int | None = Field(default=None, gt=0, le=MAX_KG)  # не передали — берём тару машины
     weighed_at: datetime | None = None                            # не передали — текущее время
+    weight_warning: str | None = Field(default=None, max_length=300)  # проверка веса на телефоне (ADR-003)
+    weight_confirmed: bool = False                                    # «Вес верный, сохранить»
 
     @field_validator("weighed_at")
     @classmethod
@@ -112,12 +115,14 @@ def create_trip(
     with conn.transaction():
         inserted = conn.execute(
             """
-            INSERT INTO trips (id, vehicle_id, field_id, gross_kg, tare_kg, weighed_at, created_by)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO trips (id, vehicle_id, field_id, gross_kg, tare_kg, weighed_at, created_by,
+                               weight_warning, weight_confirmed)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (id) DO NOTHING
             RETURNING id
             """,
-            (trip_id, body.vehicle_id, body.field_id, body.gross_kg, tare, weighed_at, user.id),
+            (trip_id, body.vehicle_id, body.field_id, body.gross_kg, tare, weighed_at, user.id,
+             body.weight_warning, body.weight_confirmed and body.weight_warning is not None),
         ).fetchone()
     response.status_code = 201 if inserted else 200
     return _fetch_trip(conn, trip_id, tz)

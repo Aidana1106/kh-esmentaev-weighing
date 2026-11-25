@@ -28,6 +28,7 @@ services:
       APP_TZ: ${APP_TZ:-Asia/Qostanay}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       SESSION_DAYS: ${SESSION_DAYS:-30}
+      WEIGHT_CHECK: ${WEIGHT_CHECK:-true}
       ADMIN_LOGIN: ${ADMIN_LOGIN:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?задайте ADMIN_PASSWORD в .env}
     ports:

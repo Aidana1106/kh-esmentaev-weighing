@@ -193,10 +193,24 @@
   </form>
 </dialog>
 
+<!-- Проверка веса: ADR-003, задача #61 -->
+<dialog id="weightDialog" aria-labelledby="weightTitle">
+  <form method="dialog">
+    <h2 id="weightTitle" data-i18n="wc_title">Проверьте брутто</h2>
+    <p id="weightText"></p>
+    <p class="muted" id="weightBasis"></p>
+    <div class="dialog-actions">
+      <button type="button" class="secondary-btn" id="weightFix" data-i18n="wc_fix">Исправить</button>
+      <button type="button" class="primary-btn" id="weightOk" data-i18n="wc_ok">Вес верный, сохранить</button>
+    </div>
+  </form>
+</dialog>
+
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="/i18n.js"></script>
 <script src="/outbox.js"></script>
+<script src="/weightcheck.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>

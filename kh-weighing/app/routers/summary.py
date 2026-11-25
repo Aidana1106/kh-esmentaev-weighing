@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, Request
 from psycopg import Connection
 
-from ..deps import ApiError, User, current_user, get_conn
+from ..deps import ApiError, User, current_user, get_conn, require_admin
 from ..timeutil import day_bounds, parse_day, year_bounds
 
 router = APIRouter(prefix="/api/summary", tags=["summary"])
@@ -59,3 +59,29 @@ def season_summary(
         raise ApiError(422, "bad_year", "Неверный год", field="year")
     start, end = year_bounds(year, tz)
     return {"year": year, **_totals(conn, start, end)}
+
+
+@router.get("/weight-check")
+def weight_check_summary(
+    days: int = 7, _: User = Depends(require_admin), conn: Connection = Depends(get_conn),
+):
+    """Мониторинг проверки веса (ADR-003) для отчёта PM: сколько предупреждений, сколько подтверждено,
+    сколько рейсов всё равно исправили после сохранения (бизнес-метрика)."""
+    if not 1 <= days <= 366:
+        raise ApiError(422, "bad_days", "Период от 1 до 366 дней", field="days")
+    row = conn.execute(
+        """
+        SELECT count(*)::int AS trips,
+               count(*) FILTER (WHERE weight_warning IS NOT NULL)::int AS warned,
+               count(*) FILTER (WHERE weight_confirmed)::int AS confirmed,
+               count(*) FILTER (WHERE is_corrected)::int AS corrected,
+               count(*) FILTER (WHERE is_corrected AND weight_warning IS NULL)::int AS corrected_without_warning
+        FROM trips WHERE weighed_at > now() - make_interval(days => %s)
+        """,
+        (days,),
+    ).fetchone()
+    n = row["trips"] or 1
+    return {"days": days, **row,
+            "warned_share": round(row["warned"] / n, 3),
+            "confirmed_share": round(row["confirmed"] / n, 3),
+            "corrected_share": round(row["corrected"] / n, 3)}
