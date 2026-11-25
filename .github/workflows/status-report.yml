@@ -1,0 +1,68 @@
+name: Статус-отчёт PM
+
+# Еженедельный статус-отчёт из данных GitHub + черновик текста от локальной модели Ollama (ЛЗ 12).
+# - по расписанию: каждый понедельник в 09:00 по Костанаю (04:00 UTC) – отчёт за прошлую неделю;
+# - вручную: Actions → «Статус-отчёт PM» → Run workflow (можно задать спринт и даты);
+# - при изменении самого скрипта в PR – прогон на двух прошедших спринтах для проверки.
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+    inputs:
+      sprint: { description: "Название, например «Спринт 6»", required: false }
+      start: { description: "Начало, ГГГГ-ММ-ДД", required: false }
+      end: { description: "Конец, ГГГГ-ММ-ДД", required: false }
+  pull_request:
+    paths:
+      - "scripts/pm_report/**"
+      - ".github/workflows/status-report.yml"
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  actions: read
+
+env:
+  OLLAMA_MODEL: qwen2.5:7b
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests==2.32.5
+
+      - name: Локальная модель Ollama (на раннере, данные никуда не уходят)
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          (ollama serve > /tmp/ollama.log 2>&1 &)
+          for i in $(seq 1 30); do curl -s localhost:11434/api/version && break; sleep 1; done
+          ollama pull "$OLLAMA_MODEL"
+
+      - name: Отчёт
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OUT_DIR: reports
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            python scripts/pm_report/status_report.py --last-week
+          elif [ -n "${{ inputs.start }}" ]; then
+            python scripts/pm_report/status_report.py --sprint "${{ inputs.sprint || 'Спринт' }}" \
+              --start "${{ inputs.start }}" --end "${{ inputs.end }}"
+          else
+            # два прошедших спринта – для проверки качества (ЛЗ 12)
+            python scripts/pm_report/status_report.py --sprint "Спринт 4" --start 2026-11-10 --end 2026-11-16
+            python scripts/pm_report/status_report.py --sprint "Спринт 5" --start 2026-11-17 --end 2026-11-23
+          fi
+          cat reports/report_*.md >> "$GITHUB_STEP_SUMMARY"
+          cat reports/report_*.md   # копия в лог прогона
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: status-report
+          path: reports/
