@@ -1,0 +1,53 @@
+name: Evals «Проверка веса»
+
+# Замер ИИ-функции «Проверка веса» на eval-наборе (ЛЗ 12): правила, статистика,
+# локальная модель Ollama без примеров и с примерами. Данные синтетические, никуда не уходят.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "evals/**"
+      - ".github/workflows/evals.yml"
+
+permissions:
+  contents: read
+
+env:
+  OLLAMA_MODEL: qwen2.5:7b
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests==2.32.5
+
+      - name: Локальная модель Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          (ollama serve > /tmp/ollama.log 2>&1 &)
+          for i in $(seq 1 30); do curl -s localhost:11434/api/version && break; sleep 1; done
+          ollama pull "$OLLAMA_MODEL"
+          ollama --version
+
+      - name: Прогон
+        run: |
+          python evals/run.py
+          echo "===== results.json ====="; cat evals/results.json
+          for f in evals/raw/*.jsonl; do echo "===== $f ====="; cat "$f"; done
+
+      - name: Токены токенизатором облачной модели (для стоимости)
+        run: |
+          pip install tiktoken==0.12.0
+          echo "===== tokens ====="; python evals/count_tokens.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: evals
+          path: |
+            evals/results.json
+            evals/raw/

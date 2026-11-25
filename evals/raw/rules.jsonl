@@ -1,0 +1,40 @@
+{"id": "w22", "vehicle": "МТЗ 1025", "kind": "correct_partial", "label": "верно", "pred": true, "reason": "нетто меньше 1/3 медианы (14450)", "ms": 0.0}
+{"id": "w25", "vehicle": "МТЗ 80", "kind": "err_transposition", "label": "ошибка", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w34", "vehicle": "МТЗ 952", "kind": "err_wrong_digit", "label": "ошибка", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w07", "vehicle": "МТЗ 952", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w11", "vehicle": "МТЗ 82", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w09", "vehicle": "МТЗ 952", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w01", "vehicle": "МТЗ 82", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w39", "vehicle": "МТЗ 952", "kind": "err_net_as_gross", "label": "ошибка", "pred": true, "reason": "нетто меньше 1/3 медианы (14700)", "ms": 0.0}
+{"id": "w38", "vehicle": "МТЗ 82", "kind": "err_net_as_gross", "label": "ошибка", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w10", "vehicle": "МТЗ 1025", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w28", "vehicle": "МТЗ 80", "kind": "err_transposition", "label": "ошибка", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w23", "vehicle": "МТЗ 952", "kind": "correct_overload", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w17", "vehicle": "МТЗ 952", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w30", "vehicle": "МТЗ 952", "kind": "err_transposition", "label": "ошибка", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w40", "vehicle": "МТЗ 1025", "kind": "err_net_as_gross", "label": "ошибка", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w18", "vehicle": "МТЗ 952", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w04", "vehicle": "МТЗ 82", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w29", "vehicle": "МТЗ 80", "kind": "err_transposition", "label": "ошибка", "pred": true, "reason": "нетто больше 1,5 медианы (15450)", "ms": 0.0}
+{"id": "w32", "vehicle": "МТЗ 1025", "kind": "err_wrong_digit", "label": "ошибка", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w14", "vehicle": "МТЗ 952", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w16", "vehicle": "МТЗ 80", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w03", "vehicle": "МТЗ 952", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w20", "vehicle": "МТЗ 1025", "kind": "correct_first_trip", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w19", "vehicle": "МТЗ 82", "kind": "correct_first_trip", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w36", "vehicle": "МТЗ 952", "kind": "err_net_as_gross", "label": "ошибка", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w27", "vehicle": "МТЗ 80", "kind": "err_transposition", "label": "ошибка", "pred": true, "reason": "нетто больше 1,5 медианы (15450)", "ms": 0.0}
+{"id": "w06", "vehicle": "МТЗ 1025", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w13", "vehicle": "МТЗ 82", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w05", "vehicle": "МТЗ 952", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w15", "vehicle": "МТЗ 952", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w31", "vehicle": "МТЗ 1025", "kind": "err_wrong_digit", "label": "ошибка", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w37", "vehicle": "МТЗ 82", "kind": "err_net_as_gross", "label": "ошибка", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w33", "vehicle": "МТЗ 1025", "kind": "err_wrong_digit", "label": "ошибка", "pred": true, "reason": "нетто больше 1,5 медианы (14450)", "ms": 0.0}
+{"id": "w21", "vehicle": "МТЗ 82", "kind": "correct_partial", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w26", "vehicle": "МТЗ 80", "kind": "err_transposition", "label": "ошибка", "pred": true, "reason": "нетто больше 1,5 медианы (15450)", "ms": 0.0}
+{"id": "w08", "vehicle": "МТЗ 1025", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w12", "vehicle": "МТЗ 1025", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w24", "vehicle": "МТЗ 1025", "kind": "correct_overload", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
+{"id": "w35", "vehicle": "МТЗ 82", "kind": "err_wrong_digit", "label": "ошибка", "pred": true, "reason": "нетто больше 1,5 медианы (13500)", "ms": 0.0}
+{"id": "w02", "vehicle": "МТЗ 82", "kind": "correct", "label": "верно", "pred": false, "reason": "в пределах правил", "ms": 0.0}
