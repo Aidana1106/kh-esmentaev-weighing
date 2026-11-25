@@ -232,3 +232,54 @@ def test_season_summary(operator):
 
 def test_health(app_client):
     assert app_client.get("/api/health").json() == {"status": "ok"}
+
+
+# --- Проверка веса (ADR-003, #61) ---------------------------------------------
+
+def test_weight_warning_is_stored_with_trip(operator):
+    text = "Нетто 7 600 кг – намного меньше, чем у МТЗ 82 сегодня (13 300–14 400 кг)."
+    r, _ = put_trip(operator, gross_kg=13400, weight_warning=text, weight_confirmed=True)
+    assert r.status_code == 201
+    assert r.json()["weight_warning"] == text and r.json()["weight_confirmed"] is True
+    plain, _ = put_trip(operator, gross_kg=20000)
+    assert plain.json()["weight_warning"] is None and plain.json()["weight_confirmed"] is False
+
+
+def test_confirmation_without_warning_is_ignored(operator):
+    r, _ = put_trip(operator, gross_kg=20000, weight_confirmed=True)
+    assert r.json()["weight_confirmed"] is False
+
+
+def test_weight_warning_length_limited(operator):
+    r, _ = put_trip(operator, weight_warning="x" * 301, weight_confirmed=True)
+    assert r.status_code == 422
+
+
+def test_vehicle_season_median_from_five_trips(operator):
+    vid = vehicle_id(operator)
+    assert next(v for v in operator.get("/api/vehicles").json() if v["id"] == vid)["median_net_kg"] is None
+    for g in (18000, 19000, 20000, 21000):
+        put_trip(operator, gross_kg=g, weighed_at=(datetime.now(UTC) - timedelta(days=2)).isoformat())
+    assert next(v for v in operator.get("/api/vehicles").json() if v["id"] == vid)["median_net_kg"] is None
+    put_trip(operator, gross_kg=22000, weighed_at=(datetime.now(UTC) - timedelta(days=2)).isoformat())
+    # нетто 12 200 … 16 200 при таре 5 800 → медиана 14 200
+    assert next(v for v in operator.get("/api/vehicles").json() if v["id"] == vid)["median_net_kg"] == 14200
+
+
+def test_client_config(operator):
+    assert operator.get("/api/client-config").json() == {"weight_check": True, "weight_check_threshold_pct": 15}
+
+
+def test_weight_check_summary_for_pm(app_client):
+    op = login(app_client, "operator")
+    put_trip(op, gross_kg=20000)
+    put_trip(op, gross_kg=13400, weight_warning="проверьте", weight_confirmed=True)
+    _, tid = put_trip(op, gross_kg=21000)
+    op.patch(f"/api/trips/{tid}", json={"gross_kg": 21500})
+    assert op.get("/api/summary/weight-check").status_code == 403
+
+    admin = login(app_client, "admin")
+    s = admin.get("/api/summary/weight-check?days=7").json()
+    assert (s["trips"], s["warned"], s["confirmed"], s["corrected"]) == (3, 1, 1, 1)
+    assert s["corrected_without_warning"] == 1 and s["warned_share"] == 0.333
+    assert admin.get("/api/summary/weight-check?days=0").status_code == 422

@@ -10,6 +10,7 @@ class Settings:
     session_days: int        # долгая сессия: в поле без интернета логин не должен слетать
     admin_login: str | None  # первый запуск: создать администратора, если пользователей нет
     admin_password: str | None
+    weight_check: bool = True       # проверка веса (ADR-003); WEIGHT_CHECK=false выключает
 
 
 def load_settings() -> Settings:
@@ -20,4 +21,5 @@ def load_settings() -> Settings:
         session_days=int(os.environ.get("SESSION_DAYS", "30")),
         admin_login=os.environ.get("ADMIN_LOGIN") or None,
         admin_password=os.environ.get("ADMIN_PASSWORD") or None,
+        weight_check=os.environ.get("WEIGHT_CHECK", "true").lower() != "false",
     )

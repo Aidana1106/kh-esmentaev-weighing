@@ -5,3 +5,4 @@ __pycache__/
 backups/
 e2e-shots/
 .venv/
+.coverage

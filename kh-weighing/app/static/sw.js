@@ -1,8 +1,8 @@
 // Service Worker: оболочка приложения открывается без интернета.
 // Запросы к /api не кэшируются — данные идут через офлайн-очередь (outbox.js).
-const VERSION = "kh-weighing-v1";
+const VERSION = "kh-weighing-v2";
 const SHELL = [
-  "/", "/index.html", "/styles.css", "/app.js", "/i18n.js", "/outbox.js",
+  "/", "/index.html", "/styles.css", "/app.js", "/i18n.js", "/outbox.js", "/weightcheck.js",
   "/manifest.webmanifest", "/icon.svg", "/icon-192.png", "/icon-512.png",
 ];
 

@@ -19,6 +19,7 @@ const state = {
   tareManual: false,
   editing: null,
   tab: "entry",
+  config: { weight_check: true, weight_check_threshold_pct: 15 },
 };
 
 // ---------- Утилиты ----------
@@ -140,16 +141,23 @@ async function doLogout() {
 // ---------- Справочники ----------
 async function loadCatalog() {
   try {
-    const [v, f] = await Promise.all([api("GET", "/api/vehicles"), api("GET", "/api/fields")]);
+    const [v, f, c] = await Promise.all([
+      api("GET", "/api/vehicles"), api("GET", "/api/fields"), api("GET", "/api/client-config"),
+    ]);
     if (v.ok && f.ok) {
       state.vehicles = v.data;
       state.fields = f.data;
-      store.set("kh.catalog", { vehicles: v.data, fields: f.data });
+      if (c.ok) state.config = c.data;
+      store.set("kh.catalog", { vehicles: v.data, fields: f.data, config: state.config });
       return;
     }
   } catch { /* офлайн — берём из кэша */ }
   const cached = store.get("kh.catalog");
-  if (cached) { state.vehicles = cached.vehicles; state.fields = cached.fields; }
+  if (cached) {
+    state.vehicles = cached.vehicles;
+    state.fields = cached.fields;
+    if (cached.config) state.config = cached.config;
+  }
 }
 
 // ---------- Форма рейса (ZER-1..7) ----------
@@ -238,6 +246,46 @@ function validateTrip() {
   return { errors, body: { vehicle_id, field_id, gross_kg: gross, tare_kg: tare } };
 }
 
+// ---------- Проверка веса (ADR-003, #61) ----------
+// Нетто сегодняшних рейсов машины: и принятые сервером, и ещё не отправленные с телефона.
+function todayNets(vehicleId) {
+  const today = localDate(new Date());
+  const serverIds = new Set(state.serverTrips.map((x) => x.id));
+  return [
+    ...state.serverTrips.filter((x) => x.vehicle_id === vehicleId).map((x) => x.net_kg),
+    ...state.outbox
+      .filter((x) => x.status === "pending" && !serverIds.has(x.id) && x.body.vehicle_id === vehicleId
+        && localDate(new Date(x.body.weighed_at)) === today)
+      .map((x) => x.body.gross_kg - x.body.tare_kg),
+  ];
+}
+
+function weightWarningText(w, vehicleName) {
+  const more = w.deviationPct > 0;
+  return w.basis === "today"
+    ? t("wc_today", fmtKg(w.net), vehicleName, fmtKg(w.lo), fmtKg(w.hi), more)
+    : t("wc_season", fmtKg(w.net), vehicleName, fmtKg(w.median), more);
+}
+
+// Показывает предупреждение; true – весовщик подтвердил вес, false – пошёл исправлять.
+function askWeight(w, vehicleName) {
+  const dlg = $("weightDialog");
+  $("weightText").textContent = weightWarningText(w, vehicleName);
+  $("weightBasis").textContent = w.basis === "today" ? t("wc_basis_today", w.trips) : t("wc_basis_season");
+  return new Promise((resolve) => {
+    const done = (ok) => {
+      $("weightOk").onclick = $("weightFix").onclick = dlg.oncancel = null;
+      dlg.close();
+      resolve(ok);
+    };
+    $("weightOk").onclick = () => done(true);
+    $("weightFix").onclick = () => done(false);
+    dlg.oncancel = (e) => { e.preventDefault(); done(false); };
+    dlg.showModal();
+    $("weightFix").focus();   // по умолчанию – «Исправить», чтобы Enter не подтверждал вес не глядя
+  });
+}
+
 async function saveTrip(e) {
   e.preventDefault();
   const form = $("tripForm");
@@ -251,10 +299,32 @@ async function saveTrip(e) {
     return;
   }
 
+  const vehicleName = state.vehicles.find((v) => v.id === body.vehicle_id)?.name;
+  let weight = {};
+  if (state.config.weight_check && window.WeightCheck) {
+    const w = WeightCheck.checkWeight({
+      net: body.gross_kg - body.tare_kg,
+      todayNets: todayNets(body.vehicle_id),
+      seasonMedian: state.vehicles.find((v) => v.id === body.vehicle_id)?.median_net_kg,
+      thresholdPct: state.config.weight_check_threshold_pct,
+    });
+    if (w) {
+      if (!(await askWeight(w, vehicleName))) {
+        $("grossInput").focus();
+        $("grossInput").select();
+        return;                                   // данные в форме остаются, весовщик исправляет брутто
+      }
+      const ru = state.lang;
+      state.lang = "ru";                          // в базу пишем текст по-русски, чтобы отчёт был единым
+      weight = { weight_warning: weightWarningText(w, vehicleName), weight_confirmed: true };
+      state.lang = ru;
+    }
+  }
+
   const item = {
     id: uuid(),
-    body: { ...body, weighed_at: new Date().toISOString() },   // время фиксируется автоматически (ZER-4)
-    vehicle_name: state.vehicles.find((v) => v.id === body.vehicle_id)?.name,
+    body: { ...body, ...weight, weighed_at: new Date().toISOString() },   // время фиксируется автоматически (ZER-4)
+    vehicle_name: vehicleName,
     field_name: state.fields.find((f) => f.id === body.field_id)?.name,
     status: "pending",
   };
@@ -336,13 +406,15 @@ function renderTripLog() {
         weighed_local: hhmm(new Date(x.body.weighed_at)),
         vehicle_name: x.vehicle_name, field_name: x.field_name,
         net_kg: x.body.gross_kg - x.body.tare_kg,
+        weight_confirmed: x.body.weight_confirmed,
       })),
   ].sort((a, b) => a.sortKey.localeCompare(b.sortKey));
 
   $("tripLog").innerHTML = rows.map((r, i) => {
     const badge = r.kind === "pending" ? `<span class="badge pending">${esc(t("pending"))}</span>`
       : r.kind === "rejected" ? `<span class="badge rejected">${esc(t("rejected"))}</span>`
-      : r.is_corrected ? `<span class="badge corrected" title="${esc(t("corrected"))}">${esc(t("corrected"))}</span>` : "";
+      : r.is_corrected ? `<span class="badge corrected" title="${esc(t("corrected"))}">${esc(t("corrected"))}</span>`
+      : r.weight_confirmed ? `<span class="badge confirmed">${esc(t("wc_confirmed"))}</span>` : "";
     return `<tr data-id="${r.id}" data-kind="${r.kind}" class="${r.kind}" tabindex="0">
       <td>${i + 1}</td><td>${esc(r.weighed_local)}</td><td>${esc(r.vehicle_name)}</td>
       <td>${esc(r.field_name)}</td><td class="num">${fmtKg(r.net_kg)}${badge}</td></tr>`;
